@@ -12,6 +12,7 @@ class ViewController: UIViewController {
     let mainScreen = MainScreenView()
     
     var contacts = [Contact]()
+    var contactIndex: Int?
         
     override func loadView() {
         view = mainScreen
@@ -48,7 +49,7 @@ class ViewController: UIViewController {
     
     @objc func onAddBarButtonTapped(){
         let addContactController = AddNewContactViewController()
-        addContactController.delegate = self
+        addContactController.mainScreenDelegate = self
         navigationController?.pushViewController(addContactController, animated: true)
     }
     
@@ -58,6 +59,12 @@ class ViewController: UIViewController {
         mainScreen.tableViewContacts.reloadData()
     }
     
+    func delegateOnEditContact(contact: Contact){
+        if let contactIndex = contactIndex {
+            contacts[contactIndex] = contact
+            mainScreen.tableViewContacts.reloadData()
+        }
+    }
 
 }
 
@@ -80,17 +87,16 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource{
         if let uwPhone = contact.phone, let uwType = contact.typeOfPhone {
             cell.labelPhone.text = uwPhone + " (" + uwType + ")"
         }
-        if let uwImage = contacts[indexPath.row].image{
-            cell.image.image = uwImage
-        }
+        cell.image?.image = contact.image
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedContact = contacts[indexPath.row]
-                
+        contactIndex = indexPath.row
         let detailsViewController = DetailsViewController()
         detailsViewController.contact = selectedContact
+        detailsViewController.mainScreenDelegate = self
                 
         navigationController?.pushViewController(detailsViewController, animated: true)
     }

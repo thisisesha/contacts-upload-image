@@ -10,7 +10,10 @@ import PhotosUI
 
 class AddNewContactViewController: UIViewController {
     
-    var delegate: ViewController!
+    var mainScreenDelegate: ViewController!
+    var detailsScreenDelegate: DetailsViewController!
+    var edit: Bool = false
+    var contact: Contact?
     
     var phoneType = "Home"
     
@@ -24,7 +27,7 @@ class AddNewContactViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Add a New Contact"
+        
         
         let attribute: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 20),
@@ -35,6 +38,16 @@ class AddNewContactViewController: UIViewController {
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
         tapRecognizer.cancelsTouchesInView = false
         view.addGestureRecognizer(tapRecognizer)
+        
+        // this class now handles both edit and add scenarios.
+        if contact != nil {
+            initializeContactFields()
+            edit = true
+            title = "Edit Contact"
+        } else {
+            edit = false
+            title = "Add a New Contact"
+        }
         
         addContactScreen.buttonSelectType.menu = getMenuTypes()
         addContactScreen.buttonTakePhoto.menu = getMenuImagePicker()
@@ -50,6 +63,24 @@ class AddNewContactViewController: UIViewController {
         navigationController?.navigationBar.titleTextAttributes = [
             .font: UIFont.systemFont(ofSize: 17)
         ]
+    }
+    
+    func initializeContactFields() {
+        if let contact = contact {
+            addContactScreen.nameTextField.text = contact.name
+            addContactScreen.emailTextField.text = contact.email
+            addContactScreen.phnoTextField.text = contact.phone
+            addContactScreen.addressTextField.text = contact.address
+            addContactScreen.cityTextField.text = contact.city
+            addContactScreen.zipTextField.text = contact.zip
+            if let img = contact.image {
+                self.addContactScreen.buttonTakePhoto.setImage(
+                    img.withRenderingMode(.alwaysOriginal),
+                    for: .normal
+                )   
+                self.pickedImage = img
+            }
+        }
     }
     
     @objc func hideKeyboardOnTap(){
@@ -91,17 +122,20 @@ class AddNewContactViewController: UIViewController {
         let name = addContactScreen.nameTextField.text
         let email = addContactScreen.emailTextField.text
         let phone = addContactScreen.phnoTextField.text
-        
-        //        let selectedIndex = addContactScreen.phoneType.selectedRow(inComponent: 0)
-        //        let phoneType = Utilities.typesOfPhones[selectedIndex]
-        
         let address = addContactScreen.addressTextField.text
         let city = addContactScreen.cityTextField.text
         let zip = addContactScreen.zipTextField.text
         
-        
         let newContact = Contact(name: name, email: email, phone: phone, typeOfPhone: phoneType, address: address, city: city, zip: zip, image: pickedImage ?? (UIImage(systemName: "person.fill"))!)
-        delegate.delegateOnAddContact(contact: newContact)
+        
+        if edit {
+            detailsScreenDelegate.contact = newContact
+            detailsScreenDelegate.updateProfileOnDetailsScreen()
+            mainScreenDelegate.delegateOnEditContact(contact: newContact)
+        } else {
+            mainScreenDelegate.delegateOnAddContact(contact: newContact)
+        }
+        
         navigationController?.popViewController(animated: true)
     }
     
@@ -247,7 +281,6 @@ extension AddNewContactViewController: UINavigationControllerDelegate, UIImagePi
             )
             self.pickedImage = image
         } else {
-            self.pickedImage = UIImage(systemName: "person.fill")
         }
     }
 }

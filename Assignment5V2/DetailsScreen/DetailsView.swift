@@ -146,5 +146,4 @@ class DetailsView: UIView {
         zipLabel.text = "\(contact.zip ?? "No zip found")"
     }
 
-
 }

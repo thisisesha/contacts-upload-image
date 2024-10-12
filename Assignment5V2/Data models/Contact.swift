@@ -19,7 +19,7 @@ struct Contact{
     var image: UIImage?
     
     init(name: String? = nil, email: String? = nil, phone: String? = nil, typeOfPhone: String? = nil,
-         address: String? = nil, city: String? = nil, zip: String? = nil, image: UIImage) {
+    address: String? = nil, city: String? = nil, zip: String? = nil, image: UIImage? = nil) {
         self.name = name
         self.email = email
         self.phone = phone
